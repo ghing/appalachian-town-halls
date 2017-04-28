@@ -2,6 +2,7 @@ class MeetingStore {
   constructor() {
     this._meetings = [];
     this._meetingsByDate = {};
+    this._meetingsByOfficial = {};
     this._officials = [];
   }
 
@@ -19,7 +20,10 @@ class MeetingStore {
     this._meetingsByDate = {};
 
     officials.forEach(official => {
-      official.meetings.forEach(meeting => this.addMeeting(meeting));
+      official.meetings.forEach(meeting => {
+        meeting.official = official;
+        this.addMeeting(meeting);
+      });
     });
 
     if (sort) {
@@ -49,18 +53,26 @@ class MeetingStore {
     if (!this._meetingsByDate[meeting.date]) {
       this._meetingsByDate[meeting.date] = [];
     }
-
     this._meetingsByDate[meeting.date].push(meeting);
 
+    if (!this._meetingsByOfficial[meeting.official.id]) {
+      this._meetingsByOfficial[meeting.official.id] = [];
+    }
+    this._meetingsByOfficial[meeting.official.id].push(meeting);
+
     return this;
+  }
+
+  getMeetings() {
+    return this._meetings;
   }
 
   getMeetingsForDate(date) {
     return this._meetingsByDate[date];
   }
 
-  getMeetings() {
-    return this._meetings;
+  getMeetingsForOfficial(officialId) {
+    return this._meetingsByOfficial[officialId];
   }
 }
 
