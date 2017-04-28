@@ -1,0 +1,4 @@
+js/*.min.js
+node_modules
+*.swp
+yarn-error.log

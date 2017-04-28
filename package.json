@@ -1,0 +1,31 @@
+{
+  "name": "appalachian-town-halls",
+  "version": "0.1.0",
+  "description": "Interactive about town hall meetings held by members of congress with districts in Appalachia.",
+  "main": "index.js",
+  "config": {
+    "requireargs": "--require d3",
+    "externalargs": "--external d3"
+  },
+  "scripts": {
+    "build:scripts:vendor": "browserify $npm_package_config_requireargs --debug  -t uglifyify > js/vendor.min.js",
+    "build:scripts:app": "browserify $npm_package_config_externalargs -t [ babelify --presets [ es2015  ] ] -t uglifyify --debug --standalone TownHalls js/src/app.js > js/app.min.js",
+    "build": "yarn run build:scripts:vendor; yarn run build:scripts:app",
+    "watch:scripts:app": "watchify js/src/app.js -o js/app.min.js $npm_package_config_externalargs -t [ babelify --presets [ es2015  ] ] --debug --standalone TownHalls",
+    "watch": "yarn run watch:scripts:app",
+    "serve": "http-server ."
+  },
+  "author": "Geoff Hing <geoffhing@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-preset-es2015": "^6.24.0",
+    "babelify": "^7.3.0",
+    "browserify": "^9.0.8",
+    "http-server": "^0.9.0",
+    "uglifyify": "^3.0.4",
+    "watchify": "^3.9.0"
+  },
+  "dependencies": {
+    "d3": "^4.7.4"
+  }
+}

@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+    <head>
+    </head>
+    <body>
+        <div id="townhall-timeline-container"></div>
+        <script src="js/vendor.min.js"></script>
+        <script src="js/app.min.js"></script>
+        <script>
+            (function(TownHalls) {
+                var app = new TownHalls.App({
+                    timelineContainer: document.getElementById('townhall-timeline-container')
+                });
+            })(window.TownHalls);
+        </script>
+    </body>
+</html>
+
