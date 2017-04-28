@@ -1,5 +1,16 @@
 import * as d3 from "d3";
 
+function ocdIdToDistrict(ocdId) {
+  const bits = ocdId.split(':');
+  const state = bits[bits.length - 2].slice(0, 2).toUpperCase();
+  const district = bits[bits.length - 1];
+  return state + "-" + district;
+}
+
+function officialDistrict(official) {
+  return ocdIdToDistrict(official.office.division.ocd_id);
+}
+
 function meetingsByOfficial(meetings) {
   const byOfficial = meetings.reduce((lookup, meeting) => {
     if (!lookup[meeting.official.id]) {
@@ -18,6 +29,9 @@ function meetingsByOfficial(meetings) {
 function renderMeeting(sel) {
   sel.text(d => {
     let label = d.official.name;
+
+    const district = officialDistrict(d.official);
+    label += " (" + district + ")";
 
     if (d.meetings.length > 1) {
       label += " x" + d.meetings.length;
