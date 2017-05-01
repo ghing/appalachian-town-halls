@@ -11,9 +11,11 @@
   "scripts": {
     "build:scripts:vendor": "browserify $npm_package_config_requireargs --debug  -t uglifyify > js/vendor.min.js",
     "build:scripts:app": "browserify $npm_package_config_externalargs -t [ babelify --presets [ es2015  ] ] -t uglifyify --debug --standalone TownHalls js/src/app.js > js/app.min.js",
-    "build": "yarn run build:scripts:vendor; yarn run build:scripts:app",
+    "build:styles": "mkdir -p css && node-sass --output-style compressed --source-map true sass/styles.scss css/styles.css",
+    "build": "run-p build:scripts:vendor build:scripts:app build:styles",
     "watch:scripts:app": "watchify js/src/app.js -o js/app.min.js $npm_package_config_externalargs -t [ babelify --presets [ es2015  ] ] --debug --standalone TownHalls",
-    "watch": "yarn run watch:scripts:app",
+    "watch:styles": "mkdir -p css && node-sass --watch --output-style compressed --source-map true sass/styles.scss css/styles.css",
+    "watch": "run-p watch:scripts:app watch:styles",
     "serve": "http-server .",
     "fetch:official-meetings": "mkdir -p data && curl --output data/official_meetings.json $npm_package_config_official_meetings_json_url",
     "fetch": "yarn run fetch:official-meetings"
@@ -25,8 +27,10 @@
     "babelify": "^7.3.0",
     "browserify": "^9.0.8",
     "http-server": "^0.9.0",
+    "node-sass": "^4.5.2",
     "uglifyify": "^3.0.4",
-    "watchify": "^3.9.0"
+    "watchify": "^3.9.0",
+    "yarn-run-all": "^3.1.1"
   },
   "dependencies": {
     "d3": "^4.7.4"

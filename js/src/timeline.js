@@ -26,32 +26,79 @@ function meetingsByOfficial(meetings) {
   return d3.values(byOfficial);
 }
 
-function renderMeeting(sel) {
-  sel.text(d => {
-    let label = d.official.name;
+function getPartyLabel(party) {
+  if (party == "Republican") {
+    return "R";
+  }
+  else if (party == "Democratic") {
+    return "D";
+  }
+}
 
-    const district = officialDistrict(d.official);
-    label += " (" + district + ")";
+function renderOfficial(sel) {
+  sel.each(function(d) {
+    const el = d3.select(this);
 
-    if (d.meetings.length > 1) {
-      label += " x" + d.meetings.length;
+    const partyLabel = getPartyLabel(d.official.party);
+    let officialClass = "timeline__meeting__official";
+    if (partyLabel) {
+      officialClass += " timeline__meeting__official--" + partyLabel.toLowerCase();
     }
 
-    return label;
+    el.append('span')
+        .attr('class', officialClass)
+        .text(d.official.name);
+
+    if (partyLabel) {
+      el.append('span')
+          .attr('class', 'timeline__meeting__party timeline__meeting__party--' + partyLabel.toLowerCase())
+          .text(" (" + partyLabel + ")");
+    }
+
+    el.append('span')
+        .attr('class', 'timeline__meeting__district')
+        .text(" (" + officialDistrict(d.official) + ")");
+
+    if (d.meetings.length == 1) {
+      if (d.meetings[0].meeting_type == "telephone") {
+        el.append('span')
+            .attr('class', 'timeline__meeting__type timeline__meeting__type--telephone')
+            .text(" \u260E");
+      }
+      else if (d.meetings[0].meeting_type == "facebook") {
+        el.append('span')
+            .attr('class', 'timeline__meeting__type timeline__meeting__type--facebook')
+            .text(" f");
+      }
+      else if (d.meetings[0].meeting_type == "radio") {
+        el.append('span')
+            .attr('class', 'timeline__meeting__type timeline__meeting__type--radio')
+            .text(" \u1F4FB");
+      }
+    }
+
+    if (d.meetings.length > 1) {
+      el.append('span')
+          .attr('class', 'timeline__meeting__count')
+          .text(" x" + d.meetings.length);
+    }
   });
 }
 
 function renderDay(sel, dateFormat) {
   sel.append('span')
+    .attr('class', 'timeline__day__number')
     .text(d => d.day);
 
   sel.append('span')
+    .attr('class', 'timeline__day__date')
     .text(d => dateFormat(d.date));
 
   sel.selectAll('.timeline__meeting')
     .data(d => meetingsByOfficial(d.meetings))
     .enter().append('div')
-      .call(renderMeeting);
+      .attr('class', 'timeline__meeting')
+      .call(renderOfficial);
 }
 
 export default function meetingTimeline() {
@@ -60,10 +107,12 @@ export default function meetingTimeline() {
   function timeline(selection) {
     selection.each(function(days) {
       const container = d3.select(this);
-
       container.selectAll('*').remove();
 
-      container.selectAll('.timeline__day')
+      const timeline = container.append('div')
+          .attr('class', 'timeline');
+
+      timeline.selectAll('.timeline__day')
         .data(days)
         .enter().append('div')
           .attr('class', 'timeline__day')

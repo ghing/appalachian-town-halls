@@ -1,0 +1,81 @@
+@mixin sans-serif-font() {
+  font-family: sans-serif;
+}
+
+@mixin republican-color() {
+  color: red;
+}
+
+@mixin democrat-color() {
+  color: blue;
+}
+
+.timeline-container {
+  text-align: center;
+}
+
+.timeline {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.timeline__day {
+  margin-bottom: 2em;
+  position: relative;
+}
+
+.timeline__day__number {
+  display: inline-block;
+
+  @include sans-serif-font;
+  font-size: 2em;
+  font-weight: bold;
+}
+
+.timeline__day__date {
+  position: absolute;
+  top: 0.5em;
+
+  margin-left: 0.50em;
+
+  @include sans-serif-font;
+  font-weight: bold;
+}
+
+.timeline__meeting {
+  padding: 0.2em;
+}
+
+.timeline__meeting__official {
+  font-weight: bold;
+}
+
+.timeline__meeting__official--d {
+  @include democrat-color;
+}
+
+.timeline__meeting__official--r {
+  @include republican-color;
+}
+
+.timeline__meeting__party--r {
+  @include republican-color;
+}
+
+.timeline__meeting__party--d {
+  @include democrat-color;
+}
+
+.timeline__meeting__type--facebook {
+  @include sans-serif-font;
+  font-weight: bold;
+  background-color: #3d5b99;
+  color: #fff;
+  padding: 0.1em 0.15em;
+  margin-left: 0.5em;
+  &::after {
+    content: '\00a0';
+  }
+}
