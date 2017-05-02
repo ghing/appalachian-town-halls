@@ -94,6 +94,10 @@ function renderDay(sel, dateFormat) {
     .attr('class', 'timeline__day__date')
     .text(d => dateFormat(d.date));
 
+  sel.append('div')
+    .attr('class', 'timeline__day__label')
+    .text(d => d.label);
+
   sel.selectAll('.timeline__meeting')
     .data(d => meetingsByOfficial(d.meetings))
     .enter().append('div')
