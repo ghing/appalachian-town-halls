@@ -1,0 +1,17 @@
+.representative-context-container {
+  text-align: center;
+}
+
+.representative-context {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+
+  font-size: 1.4em;
+}
+
+.representative-context span {
+  &::after {
+    content: " ";
+  }
+}

@@ -11,8 +11,7 @@ export default function repSearch() {
       return;
     }
 
-    const message = `This address is in ${data.name}.`;
-    messages.text(message);
+    messages.text("");
   };
 
   let handleSubmit = function() {

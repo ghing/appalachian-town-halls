@@ -5,6 +5,7 @@ class MeetingStore {
     this._meetingsByOfficial = {};
     this._meetingsByDivision = {};
     this._officials = [];
+    this._officialsByDivision = {};
   }
 
   setOfficials(officials) {
@@ -19,8 +20,11 @@ class MeetingStore {
   _setMeetingsFromOfficials(officials, sort = true) {
     this._meetings = [];
     this._meetingsByDate = {};
+    this._officialsByDivision = {};
 
     officials.forEach(official => {
+      this._officialsByDivision[official.office.division.ocd_id] = official;
+
       official.meetings.forEach(meeting => {
         meeting.official = official;
         this.addMeeting(meeting);
@@ -92,7 +96,20 @@ class MeetingStore {
   }
 
   getMeetingsForDivision(ocdId) {
-    return this._meetingsByDivision[ocdId];
+    const meetings = this._meetingsByDivision[ocdId];
+    if (!meetings) {
+      return [];
+    }
+
+    return meetings;
+  }
+
+  getOfficialForDivision(ocdId) {
+    return this._officialsByDivision[ocdId];
+  }
+
+  getAvgMeetings() {
+    return Math.round(this._meetings.length / this._officials.length);
   }
 }
 

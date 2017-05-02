@@ -3,16 +3,37 @@ import * as d3 from "d3";
 import MeetingStore from './MeetingStore';
 import meetingTimeline from './timeline';
 import repSearch from './repsearch';
+import repContext from './repcontext';
 
 const DEFAULT_LABELS = {
   noDistrictFound: "Could not find a district matching this address",
-  multipleDistrictsFound: "Found more than one districts matching this address"
+  multipleDistrictsFound: "Found more than one districts matching this address",
+  districtName: function(districtName) {
+    return `This address is in ${districtName}.`;
+  },
+  officialName: function(officialName) {
+    return `The representative for this district is ${officialName}.`;
+  },
+  avgMeetings: function(numMeetings) {
+    const s = numMeetings == 1 ? '' : 's';
+    return  `This representative has held ${numMeetings} meeting${s}, the average for Appalachian representatives.`;
+  },
+  aboveAvgMeetings: function(numMeetings, avgMeetings) {
+    const s = numMeetings == 1 ? '' : 's';
+    return  `This representative has held ${numMeetings} meeting${s}, more than the average for Appalachian representatives.`;
+  },
+  belowAvgMeetings: function(numMeetings, avgMeetings) {
+    const s = numMeetings == 1 ? '' : 's';
+    const numMeetingsWord = numMeetings == 0 ? 'no' : numMeetings;
+    return  `This representative has held ${numMeetingsWord} meeting${s}, below the average of ${avgMeetings} for Appalachian representatives.`;
+  }
 };
 
 export class App {
   constructor(options) {
     this._timelineContainer = options.timelineContainer;
     this._repSearchContainer = options.repSearchContainer;
+    this._repContextContainer = options.repContextContainer;
     this._googleApiKey = options.googleApiKey;
     this._labels = options.labels || DEFAULT_LABELS;
     this._meetingStore = new MeetingStore();
@@ -46,6 +67,8 @@ export class App {
     this._search = repSearch()
       .handleAddress(this._handleAddress)
       .handleReset(this._handleReset);
+    this._context = repContext()
+      .labels(this._labels);
 
     // These are the state variables
     this._allDays = [];
@@ -70,6 +93,9 @@ export class App {
   _handleReset() {
     if (this._searchAddress !== null) {
       this._renderTimeline(this._allDays);
+      d3.select(this._repContextContainer)
+        .datum(null)
+        .call(this._context);
     }
   }
 
@@ -98,6 +124,12 @@ export class App {
     const url = `https://content.googleapis.com/civicinfo/v2/representatives?address=${encodeURIComponent(address)}&includeOffices=false&levels=country&roles=legislatorLowerBody&alt=json&key=${this._googleApiKey}`;
 
     d3.json(url, data => {
+      if (!data) {
+        callback({
+          msg: this._labels.noDistrictFound
+        }, null);
+        return;
+      }
       // Divisions is an object keyed by OCD ID. We need a list of these IDs.
       const divisions = Object.keys(data.divisions);
 
@@ -108,16 +140,28 @@ export class App {
         }, null);
       }
 
-      // Success.  Tell the form.
-      callback(null, {
-        ocdId: divisions[0],
-        name: data.divisions[divisions[0]].name
-      });
+      // Success
+      const ocdId = divisions[0];
+      const districtName = data.divisions[ocdId].name;
 
-      const meetingIds = this._meetingStore.getMeetingsForDivision(divisions[0]).reduce((lookup, meeting) => {
+      // Tell the form
+      callback(null, {});
+
+      const meetingsForDivision = this._meetingStore.getMeetingsForDivision(divisions[0]);
+      const meetingIds = meetingsForDivision.reduce((lookup, meeting) => {
         lookup[meeting.id] = true;
         return lookup;
       }, {});
+
+      d3.select(this._repContextContainer)
+        .datum({
+          official: this._meetingStore.getOfficialForDivision(ocdId),
+          numMeetings: meetingsForDivision.length,
+          avgMeetings: this._meetingStore.getAvgMeetings(),
+          districtName: districtName
+        })
+        .call(this._context);
+
       const days = this._meetingsByDay(
         this._meetingStore,
         this._startDate,
