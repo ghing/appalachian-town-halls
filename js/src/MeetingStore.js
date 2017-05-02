@@ -3,6 +3,7 @@ class MeetingStore {
     this._meetings = [];
     this._meetingsByDate = {};
     this._meetingsByOfficial = {};
+    this._meetingsByDivision = {};
     this._officials = [];
   }
 
@@ -60,6 +61,12 @@ class MeetingStore {
     }
     this._meetingsByOfficial[meeting.official.id].push(meeting);
 
+    const ocdId = meeting.official.office.division.ocd_id;
+    if (!this._meetingsByDivision[ocdId]) {
+      this._meetingsByDivision[ocdId] = [];
+    }
+    this._meetingsByDivision[ocdId].push(meeting);
+
     return this;
   }
 
@@ -67,12 +74,25 @@ class MeetingStore {
     return this._meetings;
   }
 
-  getMeetingsForDate(date) {
-    return this._meetingsByDate[date];
+  getMeetingsForDate(date, filter) {
+    const meetings = this._meetingsByDate[date];
+    if (!meetings) {
+      return [];
+    }
+
+    if (filter) {
+      return meetings.filter(filter);
+    }
+
+    return meetings;
   }
 
   getMeetingsForOfficial(officialId) {
     return this._meetingsByOfficial[officialId];
+  }
+
+  getMeetingsForDivision(ocdId) {
+    return this._meetingsByDivision[ocdId];
   }
 }
 

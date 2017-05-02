@@ -28,25 +28,33 @@ export class App {
     // `this` when the method is used as a callback
     this._handleAddress = this._handleAddress.bind(this);
 
+    // Construct some d3 components
+    this._timeline = meetingTimeline();
+    this._search = repSearch()
+      .handleAddress(this._handleAddress);
+
+    this._allDays = [];
+
     d3.json(options.officialMeetingsJsonUrl, data => {
       this._meetingStore.setOfficials(data.objects);
-      const days = this._meetingsByDay(
+      this._allDays = this._meetingsByDay(
         this._meetingStore,
         this._startDate,
         this._endDate,
         this._annotations
       );
 
-      const timeline = meetingTimeline();
-      d3.select(this._timelineContainer)
-        .datum(days)
-        .call(timeline);
+      this._renderTimeline(this._allDays);
 
-      const search = repSearch()
-        .handleAddress(this._handleAddress);
       d3.select(this._repSearchContainer)
-        .call(search);
+        .call(this._search);
     });
+  }
+
+  _renderTimeline(days) {
+    d3.select(this._timelineContainer)
+      .datum(days)
+      .call(this._timeline);
   }
 
   _handleAddress(address, callback) {
@@ -66,8 +74,6 @@ export class App {
     const url = `https://content.googleapis.com/civicinfo/v2/representatives?address=${encodeURIComponent(address)}&includeOffices=false&levels=country&roles=legislatorLowerBody&alt=json&key=${this._googleApiKey}`;
 
     d3.json(url, data => {
-      console.log(data);
-
       // Divisions is an object keyed by OCD ID. We need a list of these IDs.
       const divisions = Object.keys(data.divisions);
 
@@ -78,31 +84,44 @@ export class App {
         }, null);
       }
 
-      // Success
+      // Success.  Tell the form.
       callback(null, {
         ocdId: divisions[0],
         name: data.divisions[divisions[0]].name
       });
+
+      const meetingIds = this._meetingStore.getMeetingsForDivision(divisions[0]).reduce((lookup, meeting) => {
+        lookup[meeting.id] = true;
+        return lookup;
+      }, {});
+      const days = this._meetingsByDay(
+        this._meetingStore,
+        this._startDate,
+        this._endDate,
+        this._annotations,
+        meeting => meetingIds[meeting.id]
+      );
+      this._renderTimeline(days);
     });
   }
 
-  _meetingsByDay(meetingStore, startDate, endDate, annotations) {
+  _meetingsByDay(meetingStore, startDate, endDate, annotations, filter) {
     const days = [];
     const format = d3.timeFormat("%Y-%m-%d");
 
     d3.timeDay.range(startDate, endDate, 1)
       .forEach((date, i) => {
         const dateStr = format(date);
-        const meetings = meetingStore.getMeetingsForDate(dateStr);
+        const meetings = meetingStore.getMeetingsForDate(dateStr, filter);
 
-        if (!meetings && !annotations[dateStr]) {
+        if (meetings.length == 0 && !annotations[dateStr]) {
           return;
         }
 
         days.push({
           day: i+1,
           date: date,
-          meetings: meetings || [],
+          meetings: meetings,
           label: annotations[dateStr] ? annotations[dateStr].label : null
         });
       });
