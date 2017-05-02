@@ -2,6 +2,7 @@ import * as d3 from "d3";
 
 export default function repSearch() {
   let handleAddress = function() {};
+  let handleReset = function() {};
   let messages = null;
 
   let receiveResponse = function(err, data) {
@@ -15,10 +16,18 @@ export default function repSearch() {
   };
 
   let handleSubmit = function() {
-    const form = d3.select(d3.event.target);
-    messages = form.select('.representative-search-form__messages');
-    handleAddress(form.select('.address-input').node().value, receiveResponse);
     d3.event.preventDefault();
+
+    const form = d3.select(d3.event.target);
+    const address = form.select('.address-input').node().value;
+
+    if (!address) {
+      // Don't allow an empty address
+      return false;
+    }
+
+    messages = form.select('.representative-search-form__messages');
+    handleAddress(address, receiveResponse);
   };
 
   const search = function(selection) {
@@ -40,6 +49,15 @@ export default function repSearch() {
           .attr('type', 'submit')
           .text("Find your representative");
 
+      form.append('button')
+          .attr('type', 'reset')
+          .text("Start over")
+          .on('click', () => {
+            messages.text("");
+            messages.selectAll('*').remove();
+            handleReset();
+          });
+
       form.append('div')
           .attr('class', 'representative-search-form__messages');
     });
@@ -49,6 +67,13 @@ export default function repSearch() {
     if (!val) { return handleAddress; }
 
     handleAddress = val;
+    return this;
+  }
+
+  search.handleReset = function(val) {
+    if (!val) { return handleReset; }
+
+    handleReset = val;
     return this;
   }
 

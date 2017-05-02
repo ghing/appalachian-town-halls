@@ -27,13 +27,17 @@ export class App {
     // Explicitely bind this method to the instance so that we can access
     // `this` when the method is used as a callback
     this._handleAddress = this._handleAddress.bind(this);
+    this._handleReset = this._handleReset.bind(this);
 
     // Construct some d3 components
     this._timeline = meetingTimeline();
     this._search = repSearch()
-      .handleAddress(this._handleAddress);
+      .handleAddress(this._handleAddress)
+      .handleReset(this._handleReset);
 
+    // These are the state variables
     this._allDays = [];
+    this._searchAddress = null;
 
     d3.json(options.officialMeetingsJsonUrl, data => {
       this._meetingStore.setOfficials(data.objects);
@@ -51,6 +55,12 @@ export class App {
     });
   }
 
+  _handleReset() {
+    if (this._searchAddress !== null) {
+      this._renderTimeline(this._allDays);
+    }
+  }
+
   _renderTimeline(days) {
     d3.select(this._timelineContainer)
       .datum(days)
@@ -58,6 +68,8 @@ export class App {
   }
 
   _handleAddress(address, callback) {
+    this._searchAddress = address;
+
     // Use the Google Civic Information API to lookup the U.S. Representative
     // for an address.
     //
