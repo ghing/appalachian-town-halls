@@ -1,0 +1,46 @@
+.representative-search-container {
+  padding-top: 2em;
+
+  text-align: center;
+}
+
+.representative-search-form {
+  box-sizing: border-box;
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin: auto;
+  padding: 1em;
+}
+
+.representative-search-form__address-input {
+  display: block;
+  box-sizing: border-box;
+
+  width: 100%;
+
+  font-size: 1.2em;
+  padding: 0.6em;
+}
+
+.representative-search-form__btn {
+  margin-top: 1em;
+
+  padding: 0.6em;
+
+  border: none;
+}
+
+.representative-search-form__btn--submit {
+  background-color: #1d85bb;
+  color: #fff;
+}
+
+.representative-search-form__btn--reset {
+  margin-left: 1em;
+}
+
+.representative-search-form__messages {
+  margin-top: 1em;
+  font-size: 1.4em;
+}

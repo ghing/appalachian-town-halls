@@ -11,7 +11,7 @@ export default function repSearch() {
       return;
     }
 
-    const message = `This address is in ${data.name}`;
+    const message = `This address is in ${data.name}.`;
     messages.text(message);
   };
 
@@ -19,7 +19,7 @@ export default function repSearch() {
     d3.event.preventDefault();
 
     const form = d3.select(d3.event.target);
-    const address = form.select('.address-input').node().value;
+    const address = form.select('.representative-search-form__address-input').node().value;
 
     if (!address) {
       // Don't allow an empty address
@@ -42,12 +42,13 @@ export default function repSearch() {
 
       form.append('input')
           .attr('type', 'text')
-          .attr('class', 'address-input')
+          .attr('class', 'representative-search-form__address-input')
           .attr('placeholder', "Enter your address");
 
       form.append('button')
           .attr('type', 'submit')
-          .text("Find your representative");
+          .text("Find your representative")
+          .attr('class', 'representative-search-form__btn representative-search-form__btn--submit');
 
       form.append('button')
           .attr('type', 'reset')
@@ -56,7 +57,8 @@ export default function repSearch() {
             messages.text("");
             messages.selectAll('*').remove();
             handleReset();
-          });
+          })
+          .attr('class', 'representative-search-form__btn representative-search-form__btn--reset');
 
       form.append('div')
           .attr('class', 'representative-search-form__messages');
