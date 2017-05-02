@@ -86,11 +86,11 @@ function renderOfficial(sel) {
 }
 
 function renderDay(sel, dateFormat) {
-  sel.append('span')
+  sel.append('h2')
     .attr('class', 'timeline__day__number')
     .text(d => d.day);
 
-  sel.append('span')
+  sel.append('div')
     .attr('class', 'timeline__day__date')
     .text(d => dateFormat(d.date));
 

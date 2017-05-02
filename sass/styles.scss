@@ -3,11 +3,11 @@
 }
 
 @mixin republican-color() {
-  color: red;
+  color: #cc3d3d;
 }
 
 @mixin democrat-color() {
-  color: blue;
+  color: #1a80c4;
 }
 
 @import 'timeline';
