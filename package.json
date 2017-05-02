@@ -18,7 +18,8 @@
     "watch": "run-p watch:scripts:app watch:styles",
     "serve": "http-server .",
     "fetch:official-meetings": "mkdir -p data && curl --output data/official_meetings.json $npm_package_config_official_meetings_json_url",
-    "fetch": "yarn run fetch:official-meetings"
+    "fetch": "yarn run fetch:official-meetings",
+    "deploy": "mkdir -p dist && mkdir -p dist/js && mkdir -p dist/css && cp index.html dist && cp js/*.js dist/js && cp -r data dist && cp css/*.css dist/css && gh-pages -d dist"
   },
   "author": "Geoff Hing <geoffhing@gmail.com>",
   "license": "MIT",
@@ -26,6 +27,7 @@
     "babel-preset-es2015": "^6.24.0",
     "babelify": "^7.3.0",
     "browserify": "^9.0.8",
+    "gh-pages": "^0.12.0",
     "http-server": "^0.9.0",
     "node-sass": "^4.5.2",
     "uglifyify": "^3.0.4",
