@@ -1,11 +1,22 @@
+function setDefault(o, prop, dflt) {
+  if (!(prop in o)) {
+    o[prop] = dflt;
+  }
+
+  return o[prop];
+}
+
 class MeetingStore {
   constructor() {
     this._meetings = [];
+    this._phoneMeetings = [];
     this._meetingsByDate = {};
     this._meetingsByOfficial = {};
     this._meetingsByDivision = {};
+    this._phoneMeetingsByDivision = {};
     this._officials = [];
     this._officialsByDivision = {};
+    this._phoneOnlyByDivision = {};
   }
 
   setOfficials(officials) {
@@ -55,27 +66,36 @@ class MeetingStore {
   addMeeting(meeting) {
     this._meetings.push(meeting);
 
-    if (!this._meetingsByDate[meeting.date]) {
-      this._meetingsByDate[meeting.date] = [];
+    if (meeting.meeting_type == 'telephone') {
+      this._phoneMeetings.push(meeting);
     }
-    this._meetingsByDate[meeting.date].push(meeting);
 
-    if (!this._meetingsByOfficial[meeting.official.id]) {
-      this._meetingsByOfficial[meeting.official.id] = [];
-    }
-    this._meetingsByOfficial[meeting.official.id].push(meeting);
+    setDefault(this._meetingsByDate, meeting.date, []).push(meeting);
+
+    setDefault(this._meetingsByOfficial, meeting.official.id, [])
+      .push(meeting);
 
     const ocdId = meeting.official.office.division.ocd_id;
-    if (!this._meetingsByDivision[ocdId]) {
-      this._meetingsByDivision[ocdId] = [];
+    setDefault(this._meetingsByDivision, ocdId, []).push(meeting);
+
+    setDefault(this._phoneMeetingsByDivision, ocdId, []).push(meeting);
+
+    if (this._phoneMeetingsByDivision.length == this._meetingsByDivision.length) {
+      this._phoneOnlyByDivision[ocdId] = true;
     }
-    this._meetingsByDivision[ocdId].push(meeting);
+    else {
+      this._phoneOnlyByDivision[ocdId] = false;
+    }
 
     return this;
   }
 
   getMeetings() {
     return this._meetings;
+  }
+
+  getPhoneMeetings() {
+    return this._phoneMeetings;
   }
 
   getMeetingsForDate(date, filter) {
@@ -104,12 +124,25 @@ class MeetingStore {
     return meetings;
   }
 
+  getPhoneMeetingsForDivision(ocdId) {
+    const meetings = this._phoneMeetingsByDivision[ocdId];
+    if (!meetings) {
+      return [];
+    }
+
+    return meetings;
+  }
+
   getOfficialForDivision(ocdId) {
     return this._officialsByDivision[ocdId];
   }
 
   getAvgMeetings() {
     return Math.round(this._meetings.length / this._officials.length);
+  }
+
+  getPercentPhoneMeetings() {
+    return this._phoneMeetings.length / this._meetings.length;
   }
 }
 

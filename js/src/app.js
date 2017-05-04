@@ -1,3 +1,4 @@
+import 'core-js/fn/object/assign';
 import * as d3 from "d3";
 
 import MeetingStore from './MeetingStore';
@@ -5,37 +6,13 @@ import meetingTimeline from './timeline';
 import repSearch from './repsearch';
 import repContext from './repcontext';
 
-const DEFAULT_LABELS = {
-  noDistrictFound: "Could not find a district matching this address",
-  multipleDistrictsFound: "Found more than one districts matching this address",
-  districtName: function(districtName) {
-    return `This address is in ${districtName}.`;
-  },
-  officialName: function(officialName) {
-    return `The representative for this district is ${officialName}.`;
-  },
-  avgMeetings: function(numMeetings) {
-    const s = numMeetings == 1 ? '' : 's';
-    return  `This representative has held ${numMeetings} meeting${s}, the average for Appalachian representatives.`;
-  },
-  aboveAvgMeetings: function(numMeetings, avgMeetings) {
-    const s = numMeetings == 1 ? '' : 's';
-    return  `This representative has held ${numMeetings} meeting${s}, more than the average for Appalachian representatives.`;
-  },
-  belowAvgMeetings: function(numMeetings, avgMeetings) {
-    const s = numMeetings == 1 ? '' : 's';
-    const numMeetingsWord = numMeetings == 0 ? 'no' : numMeetings;
-    return  `This representative has held ${numMeetingsWord} meeting${s}, below the average of ${avgMeetings} for Appalachian representatives.`;
-  }
-};
-
 export class App {
   constructor(options) {
     this._timelineContainer = options.timelineContainer;
     this._repSearchContainer = options.repSearchContainer;
     this._repContextContainer = options.repContextContainer;
     this._googleApiKey = options.googleApiKey;
-    this._labels = options.labels || DEFAULT_LABELS;
+    this._labels = Object.assign({}, options.labels);
     this._meetingStore = new MeetingStore();
     this._startDate = options.startDate || new Date(2017, 0, 20);
     this._endDate = options.endDate || new Date();
@@ -158,7 +135,9 @@ export class App {
           official: this._meetingStore.getOfficialForDivision(ocdId),
           numMeetings: meetingsForDivision.length,
           avgMeetings: this._meetingStore.getAvgMeetings(),
-          districtName: districtName
+          districtName: districtName,
+          numPhoneMeetings: this._meetingStore.getPhoneMeetingsForDivision(ocdId).length,
+          pctPhoneMeetings: this._meetingStore.getPercentPhoneMeetings()
         })
         .call(this._context);
 
