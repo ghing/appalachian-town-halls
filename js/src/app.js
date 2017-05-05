@@ -1,4 +1,6 @@
 import 'core-js/fn/object/assign';
+import 'es6-promise/auto';
+import 'isomorphic-fetch';
 import * as d3 from "d3";
 
 import MeetingStore from './MeetingStore';
@@ -51,20 +53,21 @@ export class App {
     this._allDays = [];
     this._searchAddress = null;
 
-    d3.json(options.officialMeetingsJsonUrl, data => {
-      this._meetingStore.setOfficials(data.objects);
-      this._allDays = this._meetingsByDay(
-        this._meetingStore,
-        this._startDate,
-        this._endDate,
-        this._annotations
-      );
+    fetch(options.officialMeetingsJsonUrl).then(res => res.json())
+      .then(data => {
+        this._meetingStore.setOfficials(data.objects);
+        this._allDays = this._meetingsByDay(
+          this._meetingStore,
+          this._startDate,
+          this._endDate,
+          this._annotations
+        );
 
-      this._renderTimeline(this._allDays);
+        this._renderTimeline(this._allDays);
 
-      d3.select(this._repSearchContainer)
+        d3.select(this._repSearchContainer)
         .call(this._search);
-    });
+      });
   }
 
   _handleReset() {
@@ -100,7 +103,7 @@ export class App {
     // care about the house.
     const url = `https://content.googleapis.com/civicinfo/v2/representatives?address=${encodeURIComponent(address)}&includeOffices=false&levels=country&roles=legislatorLowerBody&alt=json&key=${this._googleApiKey}`;
 
-    d3.json(url, data => {
+    fetch(url).then(res => res.json()).then(data => {
       if (!data) {
         callback({
           msg: this._labels.noDistrictFound

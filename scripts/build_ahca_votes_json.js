@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var fetch = require('node-fetch');
+require('isomorphic-fetch');
 var districtInAppalachia = require('appalachia').districtInAppalachia;
 
 var membersUrl = 'https://api.propublica.org/congress/v1/115/house/members.json';
