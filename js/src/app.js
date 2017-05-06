@@ -4,6 +4,7 @@ import 'isomorphic-fetch';
 import * as d3 from "d3";
 
 import MeetingStore from './MeetingStore';
+import VoteStore from './VoteStore';
 import meetingTimeline from './timeline';
 import repSearch from './repsearch';
 import repContext from './repcontext';
@@ -16,6 +17,7 @@ export class App {
     this._googleApiKey = options.googleApiKey;
     this._labels = Object.assign({}, options.labels);
     this._meetingStore = new MeetingStore();
+    this._voteStore = new VoteStore();
     this._startDate = options.startDate || new Date(2017, 0, 20);
     this._endDate = options.endDate || new Date();
     this._annotations = options.annotations || {
@@ -53,21 +55,35 @@ export class App {
     this._allDays = [];
     this._searchAddress = null;
 
-    fetch(options.officialMeetingsJsonUrl).then(res => res.json())
+    const meetingsPromise = fetch(options.officialMeetingsJsonUrl).then(res => res.json())
       .then(data => {
-        this._meetingStore.setOfficials(data.objects);
-        this._allDays = this._meetingsByDay(
-          this._meetingStore,
-          this._startDate,
-          this._endDate,
-          this._annotations
-        );
-
-        this._renderTimeline(this._allDays);
-
-        d3.select(this._repSearchContainer)
-        .call(this._search);
+        return data.objects;
       });
+
+    const votesPromise = fetch(options.ahcaVotesJsonUrl).then(res => res.json())
+    .then(data => {
+      return data.votes;
+    });
+
+    Promise.all([meetingsPromise, votesPromise]).then(data => {
+      const meetings = data[0];
+      const votes = data[1];
+
+      this._meetingStore.setOfficials(meetings);
+      this._voteStore.setVotes(votes);
+
+      this._allDays = this._meetingsByDay(
+        this._meetingStore,
+        this._startDate,
+        this._endDate,
+        this._annotations
+      );
+
+      this._renderTimeline(this._allDays);
+
+      d3.select(this._repSearchContainer)
+        .call(this._search);
+    });
   }
 
   _handleReset() {
@@ -140,7 +156,10 @@ export class App {
           avgMeetings: this._meetingStore.getAvgMeetings(),
           districtName: districtName,
           numPhoneMeetings: this._meetingStore.getPhoneMeetingsForDivision(ocdId).length,
-          pctPhoneMeetings: this._meetingStore.getPercentPhoneMeetings()
+          pctPhoneMeetings: this._meetingStore.getPercentPhoneMeetings(),
+          // BOOKMARK
+          // TODO: Show AHCA vote in context
+          ahcaVote: this._voteStore.getVoteForDivision(ocdId)
         })
         .call(this._context);
 
