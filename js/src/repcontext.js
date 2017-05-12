@@ -3,6 +3,11 @@ import * as d3 from "d3";
 
 import {apStyleNumber, pctFormat, pluralize} from './utils';
 
+function officialLastName(official) {
+  const nameParts = official.name.split(' ');
+  return nameParts[nameParts.length - 1];
+}
+
 const DEFAULT_LABELS = {
   noDistrictFound: "Could not find a district matching this address",
   multipleDistrictsFound: "Found more than one districts matching this address",
@@ -27,7 +32,10 @@ const DEFAULT_LABELS = {
   },
   phoneMeetings: function(ctx) {
     return `This representative held ${apStyleNumber(ctx.numPhoneMeetings)} ${pluralize('meeting', ctx.numPhoneMeetings)} over the phone.  ${pctFormat(ctx.pctPhoneMeetings)} percent of all meetings were held over the phone.`;
-  }
+  },
+  ahcaVote: function(ctx) {
+    return `${officialLastName(ctx.official)} voted "${ctx.ahcaVote}" on the American Healthcare Act.`;
+  } 
 };
 
 export default function repContext() {
@@ -77,6 +85,9 @@ export default function repContext() {
         el.append('span')
           .text(labels.phoneMeetings(data));
       }
+
+      el.append('span')
+        .text(labels.ahcaVote(data));
     });
   };
 

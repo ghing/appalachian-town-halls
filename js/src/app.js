@@ -98,7 +98,7 @@ export class App {
   _renderTimeline(days) {
     d3.select(this._timelineContainer)
       .datum(days)
-      .call(this._timeline);
+      .call(this._timeline, this._ahcaVoteForDivision.bind(this));
   }
 
   _handleAddress(address, callback) {
@@ -157,9 +157,7 @@ export class App {
           districtName: districtName,
           numPhoneMeetings: this._meetingStore.getPhoneMeetingsForDivision(ocdId).length,
           pctPhoneMeetings: this._meetingStore.getPercentPhoneMeetings(),
-          // BOOKMARK
-          // TODO: Show AHCA vote in context
-          ahcaVote: this._voteStore.getVoteForDivision(ocdId)
+          ahcaVote: this._ahcaVoteForDivision(ocdId)
         })
         .call(this._context);
 
@@ -196,5 +194,9 @@ export class App {
       });
 
     return days.reverse();
+  }
+
+  _ahcaVoteForDivision(ocdId) {
+    return this._voteStore.getVoteForDivision(ocdId).vote_position.toLowerCase();
   }
 }

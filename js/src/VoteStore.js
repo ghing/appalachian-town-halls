@@ -7,8 +7,8 @@ class VoteStore {
   setVotes(votes) {
     this._votes = [];
     this._votesByDivision = {};
-    
-    votes.forEach(vote => this.addVote);
+
+    votes.forEach(this.addVote, this);
 
     return this;
   }

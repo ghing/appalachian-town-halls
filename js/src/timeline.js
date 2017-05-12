@@ -35,7 +35,7 @@ function getPartyLabel(party) {
   }
 }
 
-function renderOfficial(sel) {
+function renderOfficial(sel, getAhcaVote) {
   sel.each(function(d) {
     const el = d3.select(this);
 
@@ -77,6 +77,20 @@ function renderOfficial(sel) {
       }
     }
 
+    const ahcaVote = getAhcaVote(d.official.office.division.ocd_id);
+    el.append('span')
+        .attr('class', d => {
+          return 'ahca-vote--' + ahcaVote;
+        })
+        .text(d => {
+          if (ahcaVote == 'yes') {
+            return " \u2714";
+          }
+          else {
+            return " \u274c";
+          }
+        });
+
     if (d.meetings.length > 1) {
       el.append('span')
           .attr('class', 'timeline__meeting__count')
@@ -85,7 +99,7 @@ function renderOfficial(sel) {
   });
 }
 
-function renderDay(sel, dateFormat) {
+function renderDay(sel, dateFormat, getAhcaVote) {
   sel.append('h2')
     .attr('class', 'timeline__day__number')
     .text(d => d.day);
@@ -102,13 +116,13 @@ function renderDay(sel, dateFormat) {
     .data(d => meetingsByOfficial(d.meetings))
     .enter().append('div')
       .attr('class', 'timeline__meeting')
-      .call(renderOfficial);
+      .call(renderOfficial, getAhcaVote);
 }
 
 export default function meetingTimeline() {
   let dateFormat = d3.timeFormat("%B %d, %Y");
 
-  function timeline(selection) {
+  function timeline(selection, getAhcaVote) {
     selection.each(function(days) {
       const container = d3.select(this);
       container.selectAll('*').remove();
@@ -120,7 +134,7 @@ export default function meetingTimeline() {
         .data(days)
         .enter().append('div')
           .attr('class', 'timeline__day')
-          .call(renderDay, dateFormat);
+          .call(renderDay, dateFormat, getAhcaVote);
     });
   }
 
