@@ -2,10 +2,15 @@
 
 require('isomorphic-fetch');
 var districtInAppalachia = require('appalachia').districtInAppalachia;
+var argv = require('minimist')(process.argv.slice(2));
 
 var membersUrl = 'https://api.propublica.org/congress/v1/115/house/members.json';
-var votesUrl = 'https://api.propublica.org/congress/v1/115/house/sessions/1/votes/256.json';
 
+var votesUrl = function getVotesUrl(rollCallNumber) {
+  // 256 for vote in May
+  // 192 for vote in March
+  return 'https://api.propublica.org/congress/v1/115/house/sessions/1/votes/' + rollCallNumber + '.json';
+}
 
 var membersLookupPromise = fetch(membersUrl, {
   method: 'GET',
@@ -30,8 +35,10 @@ var membersLookupPromise = fetch(membersUrl, {
   }, {});
 });
 
+var rollCallNumber = argv._[0];
+
 // Get votes
-var votesPromise = fetch(votesUrl, {
+var votesPromise = fetch(votesUrl(rollCallNumber), {
   method: 'GET',
   headers: {
     'X-API-Key': process.env.PROPUBLICA_API_KEY
