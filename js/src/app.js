@@ -1,108 +1,104 @@
-import 'core-js/fn/object/assign';
-import 'es6-promise/auto';
-import 'isomorphic-fetch';
+import "core-js/fn/object/assign";
+import "es6-promise/auto";
+import "isomorphic-fetch";
 import * as d3 from "d3";
 
-import MeetingStore from './MeetingStore';
-import VoteStore from './VoteStore';
-import meetingTimeline from './timeline';
-import repSearch from './repsearch';
-import repContext from './repcontext';
+import MeetingStore from "./MeetingStore";
+import VoteStore from "./VoteStore";
+import meetingTimeline from "./timeline";
+import repSearch from "./repsearch";
+import repContext from "./repcontext";
 
 export class App {
   constructor(options) {
-    this._timelineContainer = options.timelineContainer;
-    this._repSearchContainer = options.repSearchContainer;
-    this._repContextContainer = options.repContextContainer;
-    this._googleApiKey = options.googleApiKey;
-    this._labels = Object.assign({}, options.labels);
-    this._meetingStore = new MeetingStore();
-    this._voteStore = new VoteStore();
-    this._startDate = options.startDate || new Date(2017, 0, 20);
-    this._endDate = options.endDate || new Date();
-    this._annotations = options.annotations || {
+    this.timelineContainer = options.timelineContainer;
+    this.repSearchContainer = options.repSearchContainer;
+    this.repContextContainer = options.repContextContainer;
+    this.googleApiKey = options.googleApiKey;
+    this.labels = Object.assign({}, options.labels);
+    this.meetingStore = new MeetingStore();
+    this.voteStore = new VoteStore();
+    this.startDate = options.startDate || new Date(2017, 0, 20);
+    this.endDate = options.endDate || new Date();
+    this.annotations = options.annotations || {
       "2017-01-20": {
-        label: "Inauguration day"
+        label: "Inauguration day",
       },
       "2017-02-20": {
-        label: "District work period begins"
+        label: "District work period begins",
       },
       "2017-02-24": {
-        label: "District work period ends"
+        label: "District work period ends",
       },
       "2017-04-10": {
-        label: "District work period begins"
+        label: "District work period begins",
       },
       "2017-04-21": {
-        label: "District work period ends"
-      }
+        label: "District work period ends",
+      },
     };
 
     // Explicitely bind this method to the instance so that we can access
     // `this` when the method is used as a callback
-    this._handleAddress = this._handleAddress.bind(this);
-    this._handleReset = this._handleReset.bind(this);
+    this.handleAddress = this.handleAddress.bind(this);
+    this.handleReset = this.handleReset.bind(this);
 
     // Construct some d3 components
-    this._timeline = meetingTimeline();
-    this._search = repSearch()
-      .handleAddress(this._handleAddress)
-      .handleReset(this._handleReset);
-    this._context = repContext()
-      .labels(this._labels);
+    this.timeline = meetingTimeline();
+    this.search = repSearch()
+      .handleAddress(this.handleAddress)
+      .handleReset(this.handleReset);
+    this.context = repContext()
+      .labels(this.labels);
 
     // These are the state variables
-    this._allDays = [];
-    this._searchAddress = null;
+    this.allDays = [];
+    this.searchAddress = null;
 
     const meetingsPromise = fetch(options.officialMeetingsJsonUrl).then(res => res.json())
-      .then(data => {
-        return data.objects;
-      });
+      .then(data => data.objects);
 
     const votesPromise = fetch(options.ahcaVotesJsonUrl).then(res => res.json())
-    .then(data => {
-      return data.votes;
-    });
+      .then(data => data.votes);
 
-    Promise.all([meetingsPromise, votesPromise]).then(data => {
+    Promise.all([meetingsPromise, votesPromise]).then((data) => {
       const meetings = data[0];
       const votes = data[1];
 
-      this._meetingStore.setOfficials(meetings);
-      this._voteStore.setVotes(votes);
+      this.meetingStore.setOfficials(meetings);
+      this.voteStore.setVotes(votes);
 
-      this._allDays = this._meetingsByDay(
-        this._meetingStore,
-        this._startDate,
-        this._endDate,
-        this._annotations
+      this.allDays = App.meetingsByDay(
+        this.meetingStore,
+        this.startDate,
+        this.endDate,
+        this.annotations,
       );
 
-      this._renderTimeline(this._allDays);
+      this.renderTimeline(this.allDays);
 
-      d3.select(this._repSearchContainer)
-        .call(this._search);
+      d3.select(this.repSearchContainer)
+        .call(this.search);
     });
   }
 
-  _handleReset() {
-    if (this._searchAddress !== null) {
-      this._renderTimeline(this._allDays);
-      d3.select(this._repContextContainer)
+  handleReset() {
+    if (this.searchAddress !== null) {
+      this.renderTimeline(this.allDays);
+      d3.select(this.repContextContainer)
         .datum(null)
-        .call(this._context);
+        .call(this.context);
     }
   }
 
-  _renderTimeline(days) {
-    d3.select(this._timelineContainer)
+  renderTimeline(days) {
+    d3.select(this.timelineContainer)
       .datum(days)
-      .call(this._timeline, this._ahcaVoteForDivision.bind(this));
+      .call(this.timeline, this.ahcaVoteForDivision.bind(this));
   }
 
-  _handleAddress(address, callback) {
-    this._searchAddress = address;
+  handleAddress(address, callback) {
+    this.searchAddress = address;
 
     // Use the Google Civic Information API to lookup the U.S. Representative
     // for an address.
@@ -117,12 +113,12 @@ export class App {
     //
     // `levels=country` and `roles=legislatorLowerBody` specifies that we only
     // care about the house.
-    const url = `https://content.googleapis.com/civicinfo/v2/representatives?address=${encodeURIComponent(address)}&includeOffices=false&levels=country&roles=legislatorLowerBody&alt=json&key=${this._googleApiKey}`;
+    const url = `https://content.googleapis.com/civicinfo/v2/representatives?address=${encodeURIComponent(address)}&includeOffices=false&levels=country&roles=legislatorLowerBody&alt=json&key=${this.googleApiKey}`;
 
-    fetch(url).then(res => res.json()).then(data => {
+    fetch(url).then(res => res.json()).then((data) => {
       if (!data) {
         callback({
-          msg: this._labels.noDistrictFound
+          msg: this.labels.noDistrictFound,
         }, null);
         return;
       }
@@ -130,49 +126,52 @@ export class App {
       const divisions = Object.keys(data.divisions);
 
       // There should be one and only one congressional district for an address
-      if (divisions.length != 1) {
+      if (divisions.length !== 1) {
         callback({
-          msg: division.length == 0 ? this._labels.noDistrictFound : this._labels.multipleDistrictsFound
+          msg: (
+            divisions.length === 0 ?
+            this.labels.noDistrictFound :
+            this.labels.multipleDistrictsFound
+          ),
         }, null);
       }
 
       // Success
       const ocdId = divisions[0];
-      const districtName = data.divisions[ocdId].name;
 
       // Tell the form
       callback(null, {});
 
-      const meetingsForDivision = this._meetingStore.getMeetingsForDivision(divisions[0]);
-      const meetingIds = meetingsForDivision.reduce((lookup, meeting) => {
-        lookup[meeting.id] = true;
-        return lookup;
-      }, {});
+      const meetingsForDivision = this.meetingStore.getMeetingsForDivision(divisions[0]);
+      const meetingIds = {};
+      meetingsForDivision.forEach((meeting) => {
+        meetingIds[meeting.id] = true;
+      });
 
-      d3.select(this._repContextContainer)
+      d3.select(this.repContextContainer)
         .datum({
-          official: this._meetingStore.getOfficialForDivision(ocdId),
+          official: this.meetingStore.getOfficialForDivision(ocdId),
           numMeetings: meetingsForDivision.length,
-          avgMeetings: this._meetingStore.getAvgMeetings(),
-          districtName: districtName,
-          numPhoneMeetings: this._meetingStore.getPhoneMeetingsForDivision(ocdId).length,
-          pctPhoneMeetings: this._meetingStore.getPercentPhoneMeetings(),
-          ahcaVote: this._ahcaVoteForDivision(ocdId)
+          avgMeetings: this.meetingStore.getAvgMeetings(),
+          districtName: data.divisions[ocdId].name,
+          numPhoneMeetings: this.meetingStore.getPhoneMeetingsForDivision(ocdId).length,
+          pctPhoneMeetings: this.meetingStore.getPercentPhoneMeetings(),
+          ahcaVote: this.ahcaVoteForDivision(ocdId),
         })
-        .call(this._context);
+        .call(this.context);
 
-      const days = this._meetingsByDay(
-        this._meetingStore,
-        this._startDate,
-        this._endDate,
-        this._annotations,
-        meeting => meetingIds[meeting.id]
+      const days = App.meetingsByDay(
+        this.meetingStore,
+        this.startDate,
+        this.endDate,
+        this.annotations,
+        meeting => meetingIds[meeting.id],
       );
-      this._renderTimeline(days);
+      this.renderTimeline(days);
     });
   }
 
-  _meetingsByDay(meetingStore, startDate, endDate, annotations, filter) {
+  static meetingsByDay(meetingStore, startDate, endDate, annotations, filter) {
     const days = [];
     const format = d3.timeFormat("%Y-%m-%d");
 
@@ -181,22 +180,24 @@ export class App {
         const dateStr = format(date);
         const meetings = meetingStore.getMeetingsForDate(dateStr, filter);
 
-        if (meetings.length == 0 && !annotations[dateStr]) {
+        if (meetings.length === 0 && !annotations[dateStr]) {
           return;
         }
 
         days.push({
-          day: i+1,
+          day: i + 1,
+          // eslint-disable-next-line object-shorthand
           date: date,
+          // eslint-disable-next-line object-shorthand
           meetings: meetings,
-          label: annotations[dateStr] ? annotations[dateStr].label : null
+          label: annotations[dateStr] ? annotations[dateStr].label : null,
         });
       });
 
     return days.reverse();
   }
 
-  _ahcaVoteForDivision(ocdId) {
-    return this._voteStore.getVoteForDivision(ocdId).vote_position.toLowerCase();
+  ahcaVoteForDivision(ocdId) {
+    return this.voteStore.getVoteForDivision(ocdId).vote_position.toLowerCase();
   }
 }

@@ -1,10 +1,10 @@
 import * as d3 from "d3";
 
 function ocdIdToDistrict(ocdId) {
-  const bits = ocdId.split(':');
+  const bits = ocdId.split(":");
   const state = bits[bits.length - 2].slice(0, 2).toUpperCase();
   const district = bits[bits.length - 1];
-  return state + "-" + district;
+  return `${state}-${district}`;
 }
 
 function officialDistrict(official) {
@@ -12,128 +12,127 @@ function officialDistrict(official) {
 }
 
 function meetingsByOfficial(meetings) {
-  const byOfficial = meetings.reduce((lookup, meeting) => {
-    if (!lookup[meeting.official.id]) {
-      lookup[meeting.official.id] = {
+  const byOfficial = {};
+  meetings.forEach((meeting) => {
+    if (!byOfficial[meeting.official.id]) {
+      byOfficial[meeting.official.id] = {
         official: meeting.official,
-        meetings: []
+        meetings: [],
       };
     }
-    lookup[meeting.official.id].meetings.push(meeting);
-    return lookup;
-  }, {});
+    byOfficial[meeting.official.id].meetings.push(meeting);
+  });
 
   return d3.values(byOfficial);
 }
 
 function getPartyLabel(party) {
-  if (party == "Republican") {
-    return "R";
-  }
-  else if (party == "Democratic") {
-    return "D";
-  }
+  const partyToLabel = {
+    Republican: "R",
+    Democratic: "D",
+  };
+
+  return partyToLabel[party];
 }
 
 function renderOfficial(sel, getAhcaVote) {
-  sel.each(function(d) {
+  // eslint-disable-next-line func-names
+  sel.each(function (d) {
     const el = d3.select(this);
 
     const partyLabel = getPartyLabel(d.official.party);
     let officialClass = "timeline__meeting__official";
     if (partyLabel) {
-      officialClass += " timeline__meeting__official--" + partyLabel.toLowerCase();
+      officialClass += ` timeline__meeting__official--${partyLabel.toLowerCase()}`;
     }
 
-    el.append('span')
-        .attr('class', officialClass)
+    el.append("span")
+        .attr("class", officialClass)
         .text(d.official.name);
 
     if (partyLabel) {
-      el.append('span')
-          .attr('class', 'timeline__meeting__party timeline__meeting__party--' + partyLabel.toLowerCase())
-          .text(" (" + partyLabel + ")");
+      el.append("span")
+          .attr("class", `timeline__meeting__party timeline__meeting__party--${partyLabel.toLowerCase()}`)
+          .text(` (${partyLabel})`);
     }
 
-    el.append('span')
-        .attr('class', 'timeline__meeting__district')
-        .text(" (" + officialDistrict(d.official) + ")");
+    el.append("span")
+        .attr("class", "timeline__meeting__district")
+        .text(` (${officialDistrict(d.official)})`);
 
-    if (d.meetings.length == 1) {
-      if (d.meetings[0].meeting_type == "telephone") {
-        el.append('span')
-            .attr('class', 'timeline__meeting__type timeline__meeting__type--telephone')
+    if (d.meetings.length === 1) {
+      if (d.meetings[0].meeting_type === "telephone") {
+        el.append("span")
+            .attr("class", "timeline__meeting__type timeline__meeting__type--telephone")
             .text(" \u260E");
       }
-      else if (d.meetings[0].meeting_type == "facebook") {
-        el.append('span')
-            .attr('class', 'timeline__meeting__type timeline__meeting__type--facebook')
+      else if (d.meetings[0].meeting_type === "facebook") {
+        el.append("span")
+            .attr("class", "timeline__meeting__type timeline__meeting__type--facebook")
             .text(" f");
       }
-      else if (d.meetings[0].meeting_type == "radio") {
-        el.append('span')
-            .attr('class', 'timeline__meeting__type timeline__meeting__type--radio')
+      else if (d.meetings[0].meeting_type === "radio") {
+        el.append("span")
+            .attr("class", "timeline__meeting__type timeline__meeting__type--radio")
             .text(" \u1F4FB");
       }
     }
 
     const ahcaVote = getAhcaVote(d.official.office.division.ocd_id);
-    el.append('span')
-        .attr('class', d => {
-          return 'ahca-vote--' + ahcaVote;
-        })
-        .text(d => {
-          if (ahcaVote == 'yes') {
+    el.append("span")
+        .attr("class", () => `ahca-vote--${ahcaVote}`)
+        .text(() => {
+          if (ahcaVote === "yes") {
             return " \u2714";
           }
-          else {
-            return " \u274c";
-          }
+
+          return " \u274c";
         });
 
     if (d.meetings.length > 1) {
-      el.append('span')
-          .attr('class', 'timeline__meeting__count')
-          .text(" x" + d.meetings.length);
+      el.append("span")
+          .attr("class", "timeline__meeting__count")
+          .text(` x${d.meetings.length}`);
     }
   });
 }
 
 function renderDay(sel, dateFormat, getAhcaVote) {
-  sel.append('h2')
-    .attr('class', 'timeline__day__number')
+  sel.append("h2")
+    .attr("class", "timeline__day__number")
     .text(d => d.day);
 
-  sel.append('div')
-    .attr('class', 'timeline__day__date')
+  sel.append("div")
+    .attr("class", "timeline__day__date")
     .text(d => dateFormat(d.date));
 
-  sel.append('div')
-    .attr('class', 'timeline__day__label')
+  sel.append("div")
+    .attr("class", "timeline__day__label")
     .text(d => d.label);
 
-  sel.selectAll('.timeline__meeting')
+  sel.selectAll(".timeline__meeting")
     .data(d => meetingsByOfficial(d.meetings))
-    .enter().append('div')
-      .attr('class', 'timeline__meeting')
+    .enter().append("div")
+      .attr("class", "timeline__meeting")
       .call(renderOfficial, getAhcaVote);
 }
 
 export default function meetingTimeline() {
-  let dateFormat = d3.timeFormat("%B %d, %Y");
+  const dateFormat = d3.timeFormat("%B %d, %Y");
 
   function timeline(selection, getAhcaVote) {
-    selection.each(function(days) {
+    // eslint-disable-next-line func-names
+    selection.each(function (days) {
       const container = d3.select(this);
-      container.selectAll('*').remove();
+      container.selectAll("*").remove();
 
-      const timeline = container.append('div')
-          .attr('class', 'timeline');
+      const timelineContainer = container.append("div")
+          .attr("class", "timeline");
 
-      timeline.selectAll('.timeline__day')
+      timelineContainer.selectAll(".timeline__day")
         .data(days)
-        .enter().append('div')
-          .attr('class', 'timeline__day')
+        .enter().append("div")
+          .attr("class", "timeline__day")
           .call(renderDay, dateFormat, getAhcaVote);
     });
   }

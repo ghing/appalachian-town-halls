@@ -1,5 +1,6 @@
 function setDefault(o, prop, dflt) {
   if (!(prop in o)) {
+    // eslint-disable-next-line no-param-reassign
     o[prop] = dflt;
   }
 
@@ -8,49 +9,50 @@ function setDefault(o, prop, dflt) {
 
 class MeetingStore {
   constructor() {
-    this._meetings = [];
-    this._phoneMeetings = [];
-    this._meetingsByDate = {};
-    this._meetingsByOfficial = {};
-    this._meetingsByDivision = {};
-    this._phoneMeetingsByDivision = {};
-    this._officials = [];
-    this._officialsByDivision = {};
-    this._phoneOnlyByDivision = {};
+    this.meetings = [];
+    this.phoneMeetings = [];
+    this.meetingsByDate = {};
+    this.meetingsByOfficial = {};
+    this.meetingsByDivision = {};
+    this.phoneMeetingsByDivision = {};
+    this.officials = [];
+    this.officialsByDivision = {};
+    this.phoneOnlyByDivision = {};
   }
 
   setOfficials(officials) {
-    this._officials = officials;
-    this._setMeetingsFromOfficials(this._officials);
+    this.officials = officials;
+    this.setMeetingsFromOfficials(this.officials);
   }
 
   getOfficials() {
-    return this._officials;
+    return this.officials;
   }
 
-  _setMeetingsFromOfficials(officials, sort = true) {
-    this._meetings = [];
-    this._meetingsByDate = {};
-    this._officialsByDivision = {};
+  setMeetingsFromOfficials(officials, sort = true) {
+    this.meetings = [];
+    this.meetingsByDate = {};
+    this.officialsByDivision = {};
 
-    officials.forEach(official => {
-      this._officialsByDivision[official.office.division.ocd_id] = official;
+    officials.forEach((official) => {
+      this.officialsByDivision[official.office.division.ocd_id] = official;
 
-      official.meetings.forEach(meeting => {
+      official.meetings.forEach((meeting) => {
+        // eslint-disable-next-line no-param-reassign
         meeting.official = official;
         this.addMeeting(meeting);
       });
     });
 
     if (sort) {
-      this._sortMeetingsByDate();
+      this.sortMeetingsByDate();
     }
 
     return this;
   }
 
-  _sortMeetingsByDate() {
-    this._meetings.sort((a, b) => {
+  sortMeetingsByDate() {
+    this.meetings.sort((a, b) => {
       if (a.date > b.date) {
         return -1;
       }
@@ -64,42 +66,42 @@ class MeetingStore {
   }
 
   addMeeting(meeting) {
-    this._meetings.push(meeting);
+    this.meetings.push(meeting);
 
-    if (meeting.meeting_type == 'telephone') {
-      this._phoneMeetings.push(meeting);
+    if (meeting.meeting_type === "telephone") {
+      this.phoneMeetings.push(meeting);
     }
 
-    setDefault(this._meetingsByDate, meeting.date, []).push(meeting);
+    setDefault(this.meetingsByDate, meeting.date, []).push(meeting);
 
-    setDefault(this._meetingsByOfficial, meeting.official.id, [])
+    setDefault(this.meetingsByOfficial, meeting.official.id, [])
       .push(meeting);
 
     const ocdId = meeting.official.office.division.ocd_id;
-    setDefault(this._meetingsByDivision, ocdId, []).push(meeting);
+    setDefault(this.meetingsByDivision, ocdId, []).push(meeting);
 
-    setDefault(this._phoneMeetingsByDivision, ocdId, []).push(meeting);
+    setDefault(this.phoneMeetingsByDivision, ocdId, []).push(meeting);
 
-    if (this._phoneMeetingsByDivision.length == this._meetingsByDivision.length) {
-      this._phoneOnlyByDivision[ocdId] = true;
+    if (this.phoneMeetingsByDivision.length === this.meetingsByDivision.length) {
+      this.phoneOnlyByDivision[ocdId] = true;
     }
     else {
-      this._phoneOnlyByDivision[ocdId] = false;
+      this.phoneOnlyByDivision[ocdId] = false;
     }
 
     return this;
   }
 
   getMeetings() {
-    return this._meetings;
+    return this.meetings;
   }
 
   getPhoneMeetings() {
-    return this._phoneMeetings;
+    return this.phoneMeetings;
   }
 
   getMeetingsForDate(date, filter) {
-    const meetings = this._meetingsByDate[date];
+    const meetings = this.meetingsByDate[date];
     if (!meetings) {
       return [];
     }
@@ -112,11 +114,11 @@ class MeetingStore {
   }
 
   getMeetingsForOfficial(officialId) {
-    return this._meetingsByOfficial[officialId];
+    return this.meetingsByOfficial[officialId];
   }
 
   getMeetingsForDivision(ocdId) {
-    const meetings = this._meetingsByDivision[ocdId];
+    const meetings = this.meetingsByDivision[ocdId];
     if (!meetings) {
       return [];
     }
@@ -125,7 +127,7 @@ class MeetingStore {
   }
 
   getPhoneMeetingsForDivision(ocdId) {
-    const meetings = this._phoneMeetingsByDivision[ocdId];
+    const meetings = this.phoneMeetingsByDivision[ocdId];
     if (!meetings) {
       return [];
     }
@@ -134,15 +136,15 @@ class MeetingStore {
   }
 
   getOfficialForDivision(ocdId) {
-    return this._officialsByDivision[ocdId];
+    return this.officialsByDivision[ocdId];
   }
 
   getAvgMeetings() {
-    return Math.round(this._meetings.length / this._officials.length);
+    return Math.round(this.meetings.length / this.officials.length);
   }
 
   getPercentPhoneMeetings() {
-    return this._phoneMeetings.length / this._meetings.length;
+    return this.phoneMeetings.length / this.meetings.length;
   }
 }
 

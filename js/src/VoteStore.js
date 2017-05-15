@@ -1,12 +1,12 @@
 class VoteStore {
   constructor() {
-    this._votes = [];
-    this._votesByDivision = {};
+    this.votes = [];
+    this.votesByDivision = {};
   }
 
   setVotes(votes) {
-    this._votes = [];
-    this._votesByDivision = {};
+    this.votes = [];
+    this.votesByDivision = {};
 
     votes.forEach(this.addVote, this);
 
@@ -14,16 +14,16 @@ class VoteStore {
   }
 
   addVote(vote) {
-    this._votes.push[vote];
-    this._votesByDivision[vote.ocd_id] = vote;
+    this.votes.push(vote);
+    this.votesByDivision[vote.ocd_id] = vote;
   }
 
   getVotes() {
-    return this._votes;
+    return this.votes;
   }
 
   getVoteForDivision(ocdId) {
-    return this._votesByDivision[ocdId];
+    return this.votesByDivision[ocdId];
   }
 }
 
