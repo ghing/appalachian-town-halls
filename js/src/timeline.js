@@ -63,24 +63,28 @@ function renderOfficial(sel, getAhcaVote) {
     if (d.meetings.length === 1) {
       if (d.meetings[0].meeting_type === "telephone") {
         el.append("span")
+            .attr("title", "Telephone meeting")
             .attr("class", "timeline__meeting__type timeline__meeting__type--telephone")
             .text(" \u260E");
       }
       else if (d.meetings[0].meeting_type === "facebook") {
         el.append("span")
             .attr("class", "timeline__meeting__type timeline__meeting__type--facebook")
+            .attr("title", "Facebook meeting")
             .text(" f");
       }
       else if (d.meetings[0].meeting_type === "radio") {
         el.append("span")
             .attr("class", "timeline__meeting__type timeline__meeting__type--radio")
+            .attr("title", "Radio meeting")
             .text(" \u1F4FB");
       }
     }
 
     const ahcaVote = getAhcaVote(d.official.office.division.ocd_id);
     el.append("span")
-        .attr("class", () => `ahca-vote--${ahcaVote}`)
+        .attr("class", `ahca-vote--${ahcaVote}`)
+        .attr("title", `Voted ${ahcaVote} on the AHCA`)
         .text(() => {
           if (ahcaVote === "yes") {
             return " \u2714";
