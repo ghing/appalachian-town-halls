@@ -9,6 +9,7 @@ import meetingTimeline from "./timeline";
 import repSearch from "./repsearch";
 import repContext from "./repcontext";
 
+// eslint-disable-next-line import/prefer-default-export
 export class App {
   constructor(options) {
     this.timelineContainer = options.timelineContainer;
