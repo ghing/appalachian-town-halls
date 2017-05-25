@@ -20,7 +20,7 @@
   margin-bottom: 0;
   margin-bottom: 0.1em;
 
-  font-family: Chunkfive, serif;
+  font-family: Chunkfive, serif !important;
   // Need the important to override Wordpress styles
   font-size: 2em !important;
   font-weight: bold;
