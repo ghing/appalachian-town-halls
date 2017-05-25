@@ -77,7 +77,7 @@ function renderOfficial(sel, getAhcaVote) {
         el.append("span")
             .attr("class", "timeline__meeting__type timeline__meeting__type--radio")
             .attr("title", "Radio meeting")
-            .text(" \u1F4FB");
+            .text(" 📻");
       }
     }
 
@@ -138,6 +138,28 @@ export default function meetingTimeline() {
         .enter().append("div")
           .attr("class", "timeline__day")
           .call(renderDay, dateFormat, getAhcaVote);
+
+      // Add a label that says "Day" before the first number.
+      // I know right? All this code, just for that.
+      timelineContainer.selectAll(".timeline__day__number")
+        // eslint-disable-next-line func-names
+        .each(function (d, i) {
+          if (i !== 0) {
+            return;
+          }
+
+          const dayNumber = d3.select(this);
+          const text = dayNumber.text();
+
+          dayNumber.text("");
+
+          dayNumber.append("span")
+              .attr("class", "timeline__day__day-label")
+              .text("Day ");
+
+          dayNumber.append("span")
+              .text(text);
+        });
     });
   }
 

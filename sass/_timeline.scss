@@ -10,6 +10,8 @@
 
 .timeline__day {
   position: relative;
+
+  margin-bottom: 1em;
 }
 
 .timeline__day__number {
@@ -18,16 +20,21 @@
   margin-bottom: 0;
   margin-bottom: 0.1em;
 
-  @include sans-serif-font;
-  font-size: 2em;
+  font-family: Chunkfive, serif;
+  // Need the important to override Wordpress styles
+  font-size: 2em !important;
   font-weight: bold;
+  line-height: 1em;
+}
+
+.timeline__day__day-label {
+  font-family: "Droid Serif", serif;
+  font-size: 0.5em;
 }
 
 .timeline__day__date {
   @include sans-serif-font;
   font-weight: bold;
-
-  margin-bottom: 0.8em;
 }
 
 .timeline__day__label {
@@ -36,6 +43,9 @@
 
 .timeline__meeting {
   padding: 0.2em;
+
+  // Needed to look good with Wordpress styles
+  line-height: 1.4em;
 }
 
 .timeline__meeting__official {
