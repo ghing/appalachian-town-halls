@@ -10,6 +10,15 @@
   color: #1a80c4;
 }
 
+@mixin info-text() {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto 1em;
+
+  font-size: 1.2em;
+  line-height: 1.4em;
+}
+
 @import 'timeline';
 @import 'repsearch';
 @import 'repcontext';

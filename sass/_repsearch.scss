@@ -41,6 +41,5 @@
 }
 
 .representative-search-form__messages {
-  margin-top: 1em;
-  font-size: 1.4em;
+  @include info-text;
 }
