@@ -18,8 +18,8 @@ export class App {
     this.repContextContainer = options.repContextContainer;
     this.googleApiKey = options.googleApiKey;
     this.labels = Object.assign({
-      multipleDistrictsFound: "Found more than one districts matching this address",
-      noDistrictFound: "Could not find a district matching this address",
+      multipleDistrictsFound: "Found more than one districts matching this address.",
+      noDistrictFound: "Could not find a district matching this address.",
       nonAppalachianRep: "This representative's district does not include one of the counties in Appalachia.  This app only provides information about representatives from Appalachia.",
     }, options.labels);
     this.meetingStore = new MeetingStore();
@@ -136,12 +136,13 @@ export class App {
     const url = `https://content.googleapis.com/civicinfo/v2/representatives?address=${encodeURIComponent(address)}&includeOffices=false&levels=country&roles=legislatorLowerBody&alt=json&key=${this.googleApiKey}`;
 
     fetch(url).then(res => res.json()).then((data) => {
-      if (!data) {
+      if (!data || data.error) {
         callback({
           msg: this.labels.noDistrictFound,
         }, null);
         return;
       }
+
       // Divisions is an object keyed by OCD ID. We need a list of these IDs.
       const divisions = Object.keys(data.divisions);
 
