@@ -9,8 +9,6 @@ function officialLastName(official) {
 }
 
 const DEFAULT_LABELS = {
-  noDistrictFound: "Could not find a district matching this address",
-  multipleDistrictsFound: "Found more than one districts matching this address",
   // eslint-disable-next-line object-shorthand
   districtName: ctx => `This address is in ${ctx.districtName}.`,
   // eslint-disable-next-line object-shorthand

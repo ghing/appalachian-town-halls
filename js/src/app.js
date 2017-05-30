@@ -2,6 +2,7 @@ import "core-js/fn/object/assign";
 import "es6-promise/auto";
 import "isomorphic-fetch";
 import * as d3 from "d3";
+import districtInAppalachia from "appalachia/lib/cd/district-in-appalachia";
 
 import MeetingStore from "./MeetingStore";
 import VoteStore from "./VoteStore";
@@ -16,7 +17,11 @@ export class App {
     this.repSearchContainer = options.repSearchContainer;
     this.repContextContainer = options.repContextContainer;
     this.googleApiKey = options.googleApiKey;
-    this.labels = Object.assign({}, options.labels);
+    this.labels = Object.assign({
+      multipleDistrictsFound: "Found more than one districts matching this address",
+      noDistrictFound: "Could not find a district matching this address",
+      nonAppalachianRep: "This representative's district does not include one of the counties in Appalachia.  This app only provides information about representatives from Appalachia.",
+    }, options.labels);
     this.meetingStore = new MeetingStore();
     this.voteStore = new VoteStore();
     this.startDate = options.startDate || new Date(2017, 0, 20);
@@ -92,6 +97,20 @@ export class App {
     }
   }
 
+  /**
+   * Returns state and district number from an OCD ID.
+   */
+  static parseOcdId(ocdId) {
+    const bits = ocdId.split("/");
+    const cdBits = bits[bits.length - 1].split(":");
+    const stateBits = bits[bits.length - 2].split(":");
+
+    return {
+      state: stateBits[1].toUpperCase(),
+      cd: cdBits[1],
+    };
+  }
+
   renderTimeline(days) {
     d3.select(this.timelineContainer)
       .datum(days)
@@ -138,7 +157,17 @@ export class App {
       }
 
       // Success
+
+      // Check and make sure that the district is in Appalachia
       const ocdId = divisions[0];
+      const stateDistrict = App.parseOcdId(ocdId);
+
+      if (!districtInAppalachia(stateDistrict.state, stateDistrict.cd)) {
+        callback({
+          msg: this.labels.nonAppalachianRep,
+        }, null);
+        return;
+      }
 
       // Tell the form
       callback(null, {});

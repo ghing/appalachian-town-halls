@@ -4,8 +4,8 @@
   "description": "Interactive about town hall meetings held by members of congress with districts in Appalachia.",
   "main": "index.js",
   "config": {
-    "requireargs": "--require d3 --require core-js/fn/object/assign --require isomorphic-fetch --require es6-promise",
-    "externalargs": "--external d3 --external core-js/fn/object/assign --external isomorphic-fetch --external es6-promise",
+    "requireargs": "--require d3 --require core-js/fn/object/assign --require isomorphic-fetch --require es6-promise --require appalachia/lib/cd/district-in-appalachia",
+    "externalargs": "--external d3 --external core-js/fn/object/assign --external isomorphic-fetch --external es6-promise --external appalachia/lib/cd/district-in-appalachia",
     "official_meetings_json_url": "https://publicmeetings.herokuapp.com/api/v1/officials/"
   },
   "scripts": {
@@ -28,7 +28,6 @@
   "author": "Geoff Hing <geoffhing@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "appalachia": "^0.3.0",
     "babel-preset-es2015": "^6.24.0",
     "babelify": "^7.3.0",
     "browserify": "^9.0.8",
@@ -44,6 +43,7 @@
     "yarn-run-all": "^3.1.1"
   },
   "dependencies": {
+    "appalachia": "^0.3.0",
     "core-js": "^2.4.1",
     "d3": "^4.7.4",
     "es6-promise": "^4.1.0",
