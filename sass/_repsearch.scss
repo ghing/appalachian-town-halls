@@ -42,4 +42,6 @@
 
 .representative-search-form__messages {
   @include info-text;
+
+  margin-top: 1em;
 }
