@@ -117,6 +117,12 @@ export class App {
       .call(this.timeline, this.ahcaVoteForDivision.bind(this));
   }
 
+  clearContext() {
+    d3.select(this.repContextContainer)
+      .selectAll("*")
+      .remove();
+  }
+
   handleAddress(address, callback) {
     this.searchAddress = address;
 
@@ -140,6 +146,7 @@ export class App {
         callback({
           msg: this.labels.noDistrictFound,
         }, null);
+        this.clearContext();
         return;
       }
 
@@ -155,6 +162,8 @@ export class App {
             this.labels.multipleDistrictsFound
           ),
         }, null);
+        this.clearContext();
+        return;
       }
 
       // Success
@@ -167,6 +176,7 @@ export class App {
         callback({
           msg: this.labels.nonAppalachianRep,
         }, null);
+        this.clearContext();
         return;
       }
 
