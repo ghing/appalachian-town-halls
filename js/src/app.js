@@ -27,6 +27,7 @@ export class App {
     this.startDate = options.startDate || new Date(2017, 0, 20);
     this.endDate = options.endDate || new Date();
     this.annotations = options.annotations || {
+      // Source: https://www.majorityleader.gov/wp-content/uploads/2016/11/2017-MONTHLY-CALENDAR.pdf
       "2017-01-20": {
         label: "Inauguration day",
       },
@@ -40,6 +41,12 @@ export class App {
         label: "District work period begins",
       },
       "2017-04-21": {
+        label: "District work period ends",
+      },
+      "2017-05-30": {
+        label: "District work period begins",
+      },
+      "2017-06-02": {
         label: "District work period ends",
       },
     };
