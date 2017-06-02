@@ -129,6 +129,7 @@ export default function meetingTimeline() {
     selection.each(function (days) {
       const container = d3.select(this);
       container.selectAll("*").remove();
+      container.text("");
 
       const timelineContainer = container.append("div")
           .attr("class", "timeline");
