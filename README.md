@@ -33,6 +33,13 @@ Run a local development server:
 
     yarn run serve
 
+Rendering timeline to string
+----------------------------
+
+If you would like to render the timeline to a string, perhaps to bootstrap the initial page HTML, you can run a script to render the timeline HTML to a string:
+
+   ./scripts/render_timeline.js
+
 Deployment
 ----------
 

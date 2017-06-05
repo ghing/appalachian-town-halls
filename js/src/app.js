@@ -4,6 +4,7 @@ import "isomorphic-fetch";
 import * as d3 from "d3";
 import districtInAppalachia from "appalachia/lib/cd/district-in-appalachia";
 
+import annotations from "./annotations";
 import MeetingStore from "./MeetingStore";
 import VoteStore from "./VoteStore";
 import meetingTimeline from "./timeline";
@@ -26,31 +27,9 @@ export class App {
     this.voteStore = new VoteStore();
     this.startDate = options.startDate || new Date(2017, 0, 20);
     this.endDate = options.endDate || new Date();
-    this.annotations = options.annotations || {
-      // Source: https://www.majorityleader.gov/wp-content/uploads/2016/11/2017-MONTHLY-CALENDAR.pdf
-      "2017-01-20": {
-        label: "Inauguration day",
-      },
-      "2017-02-20": {
-        label: "District work period begins",
-      },
-      "2017-02-24": {
-        label: "District work period ends",
-      },
-      "2017-04-10": {
-        label: "District work period begins",
-      },
-      "2017-04-21": {
-        label: "District work period ends",
-      },
-      "2017-05-30": {
-        label: "District work period begins",
-      },
-      "2017-06-02": {
-        label: "District work period ends",
-      },
-    };
-
+    this.dayRange = d3.timeDay.range(this.startDate, this.endDate, 1);
+    this.timeFormat = d3.timeFormat("%Y-%m-%d");
+    this.annotations = options.annotations || annotations;
     // Explicitely bind this method to the instance so that we can access
     // `this` when the method is used as a callback
     this.handleAddress = this.handleAddress.bind(this);
@@ -81,11 +60,10 @@ export class App {
       this.meetingStore.setOfficials(meetings);
       this.voteStore.setVotes(votes);
 
-      this.allDays = App.meetingsByDay(
-        this.meetingStore,
-        this.startDate,
-        this.endDate,
+      this.allDays = this.meetingStore.meetingsByDay(
+        this.dayRange,
         this.annotations,
+        this.timeFormat,
       );
 
       this.renderTimeline(this.allDays);
@@ -208,42 +186,16 @@ export class App {
         })
         .call(this.context);
 
-      const days = App.meetingsByDay(
-        this.meetingStore,
-        this.startDate,
-        this.endDate,
+      const days = this.meetingStore.meetingsByDay(
+        this.dayRange,
         this.annotations,
+        this.timeFormat,
         meeting => meetingIds[meeting.id],
       );
       this.renderTimeline(days);
     });
   }
 
-  static meetingsByDay(meetingStore, startDate, endDate, annotations, filter) {
-    const days = [];
-    const format = d3.timeFormat("%Y-%m-%d");
-
-    d3.timeDay.range(startDate, endDate, 1)
-      .forEach((date, i) => {
-        const dateStr = format(date);
-        const meetings = meetingStore.getMeetingsForDate(dateStr, filter);
-
-        if (meetings.length === 0 && !annotations[dateStr]) {
-          return;
-        }
-
-        days.push({
-          day: i + 1,
-          // eslint-disable-next-line object-shorthand
-          date: date,
-          // eslint-disable-next-line object-shorthand
-          meetings: meetings,
-          label: annotations[dateStr] ? annotations[dateStr].label : null,
-        });
-      });
-
-    return days.reverse();
-  }
 
   ahcaVoteForDivision(ocdId) {
     return this.voteStore.getVoteForDivision(ocdId).vote_position.toLowerCase();

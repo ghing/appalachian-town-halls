@@ -146,6 +146,30 @@ class MeetingStore {
   getPercentPhoneMeetings() {
     return this.phoneMeetings.length / this.meetings.length;
   }
+
+  meetingsByDay(dayRange, annotations, format, filter) {
+    const days = [];
+
+    dayRange.forEach((date, i) => {
+      const dateStr = format(date);
+      const meetings = this.getMeetingsForDate(dateStr, filter);
+
+      if (meetings.length === 0 && !annotations[dateStr]) {
+        return;
+      }
+
+      days.push({
+        day: i + 1,
+        // eslint-disable-next-line object-shorthand
+        date: date,
+        // eslint-disable-next-line object-shorthand
+        meetings: meetings,
+        label: annotations[dateStr] ? annotations[dateStr].label : null,
+      });
+    });
+
+    return days.reverse();
+  }
 }
 
 export default MeetingStore;
